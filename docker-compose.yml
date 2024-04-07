@@ -14,12 +14,18 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=fpv_db
+      - PGUSER=postgres # Added because try connection with root user
     networks:
       - idrl-network
     ports: 
       - "5432:5432"
     volumes: 
       - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   user:
     build: ./user
@@ -28,6 +34,9 @@ services:
       - ./user:/app
     networks:
       - idrl-network
+    depends_on: 
+      db:
+        condition: service_healthy
 
   api-gateway:
     image: nginx:latest
