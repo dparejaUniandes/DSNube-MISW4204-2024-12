@@ -16,7 +16,6 @@ class User(db.Model):
     password = db.Column(db.String, nullable=False)
     email = db.Column(db.String, nullable=False)
     tasks = db.relationship('Task', backref='user', lazy=True)
-    country_id = db.Column(db.Integer, db.ForeignKey('country.id'), nullable=False) (edited) 
 
 class Task(db.Model):
     id = db.Column(db.Long, primary_key=True)
@@ -32,14 +31,6 @@ class Video(db.Model):
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     task = db.relationship('Task', uselist=False, backref='video', lazy=True)
-
-
-    
-#We may be deleting this one
-class Country(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, nullable=False)
-    users = db.relationship('User', backref='country', lazy=True)
 
 
 
