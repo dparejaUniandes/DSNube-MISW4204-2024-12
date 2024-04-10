@@ -2,13 +2,19 @@ from flask import Flask
 from .models import *
 from flask_restful import Api
 from .views import *
-from config import *
+from .instance import *
 
 def create_app(config_name):
-    app = Flask(__name__)
+
+    app = Flask(__name__, instance_relative_config=True)
+    try:
+        app.config.from_pyfile('config.py')
+    except:
+        pass
+
     app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['JWT_SECRET_KEY'] = JWT_SECRET_KEY
+    app.config['JWT_SECRET_KEY'] = config.JWT_SECRET_KEY
     app.config['PROPAGATE_EXCEPTIONS'] = True
     return app
 
@@ -18,6 +24,11 @@ app_context.push()
 
 db.init_app(app)
 db.create_all()
+
+user = User(username="user 1", password="password", email="email")
+db.session.add(user)
+db.session.commit()
+print(User.query.all())
 
 api = Api(app)
 api.add_resource(TasksView, '/api/tasks') 
