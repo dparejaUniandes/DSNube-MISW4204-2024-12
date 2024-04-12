@@ -30,8 +30,6 @@ services:
   user:
     container_name: user
     build: ./user
-    ports:
-      - "5000:5000"
     environment:
         DB_URL: postgresql://postgres:postgres@db:5432/postgres
     volumes:
@@ -47,6 +45,8 @@ services:
     container_name: api-gateway
     ports:
       - 81:80
+    volumes:
+      - ./nginx/nginx-proxy.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - user
     networks:

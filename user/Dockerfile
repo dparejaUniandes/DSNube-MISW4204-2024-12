@@ -22,4 +22,4 @@ ENV FLASK_DEBUG=1
 ENV DEBUG=true
 
 # Run the Flask application
-CMD ["flask", "run", "--host=0.0.0.0", "--debugger", "--port=5000"]
+CMD ["flask", "run", "--host=0.0.0.0", "--debugger"]
