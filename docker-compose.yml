@@ -27,15 +27,15 @@ services:
       timeout: 5s
       retries: 5
 
-  apirest:
-    container_name: apirest
-    build: ./apirest
+  user:
+    container_name: user
+    build: ./user
     ports:
       - "5000:5000"
     environment:
         DB_URL: postgresql://postgres:postgres@db:5432/postgres
     volumes:
-      - ./apirest:/app
+      - ./user:/app
     networks:
       - idrl-network
     depends_on: 
@@ -48,7 +48,7 @@ services:
     ports:
       - 81:80
     depends_on:
-      - apirest
+      - user
     networks:
       - idrl-network
 
