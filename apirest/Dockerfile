@@ -18,8 +18,8 @@ EXPOSE 5000
 
 # Set the environment variable for Flask
 ENV FLASK_APP=app.py
-ENV FLASK_ENV=development
+ENV FLASK_DEBUG=1
 ENV DEBUG=true
 
 # Run the Flask application
-CMD ["flask", "run", "--host=0.0.0.0", "--debugger"]
+CMD ["flask", "run", "--host=0.0.0.0", "--debugger", "--port=5000"]
