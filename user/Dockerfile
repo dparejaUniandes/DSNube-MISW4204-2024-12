@@ -18,7 +18,7 @@ EXPOSE 5000
 
 # Set the environment variable for Flask
 ENV FLASK_APP=app.py
-ENV FLASK_ENV=development
+ENV FLASK_DEBUG=1
 ENV DEBUG=true
 
 # Run the Flask application

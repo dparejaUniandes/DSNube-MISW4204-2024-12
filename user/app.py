@@ -1,38 +1,23 @@
 from flask import Flask
-from .models import *
 from flask_restful import Api
 from .views import *
-from .instance import *
+from .models import db
+from os import environ
 
-def create_app(config_name):
+app = Flask(__name__)
 
-    app = Flask(__name__, instance_relative_config=True)
-    try:
-        app.config.from_pyfile('config.py')
-    except:
-        pass
+app.config["SQLALCHEMY_DATABASE_URI"] = environ.get('DB_URL')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['PROPAGATE_EXCEPTIONS'] = True
 
-    app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['JWT_SECRET_KEY'] = config.JWT_SECRET_KEY
-    app.config['PROPAGATE_EXCEPTIONS'] = True
-    return app
-
-app = create_app('default')
 app_context = app.app_context()
 app_context.push()
 
 db.init_app(app)
 db.create_all()
 
-user = User(username="user 1", password="password", email="email")
-db.session.add(user)
-db.session.commit()
-print(User.query.all())
-
 api = Api(app)
 api.add_resource(TasksView, '/api/tasks') 
 api.add_resource(TaskView, '/api/tasks/<int:id_task>') 
 api.add_resource(SignInView, '/api/auth/signup')
 api.add_resource(LogInView, '/api/auth/login')
-

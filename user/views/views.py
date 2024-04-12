@@ -1,12 +1,6 @@
 from flask_restful import Resource
 from ..models import *
 
-import json                                                     
-import os
-
-
-#from ...worker import read_video
-
 class LogInView(Resource):
     def post(self):
         return {'mensaje':'Hola desde el LogIn'}, 200
@@ -15,7 +9,6 @@ class SignInView(Resource):
     
     def post(self):
         return {"mensaje": 'Hola desde SignIn'}
-
 
 class TasksView(Resource):
 
