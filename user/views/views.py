@@ -3,19 +3,18 @@ from ..models import *
 from flask import request
 from sqlalchemy import exc
 import re
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from hashlib import sha256
 
 class LogInView(Resource):
     def post(self):
         username=request.json["username"]
         password=sha256(request.json["password"].encode('utf-8')).hexdigest()
-        #password=str(hash(request.json["password"]))
         user = User.query.filter(User.username == username, User.password == password).first()
         if user is None:
-            return {'mensaje':'Verify username or password'}, 404
-        token = create_access_token(identity=username)
-        return {'mensaje':'Successful login', "token": token}, 200
+            return {'message':'Verify username or password'}, 404
+        token = create_access_token(identity=user.id)
+        return {'message':'Successful login', "token": token}, 200
     
 class SignUpView(Resource):
     
@@ -30,7 +29,6 @@ class SignUpView(Resource):
             if not re.search('((?=.*\d)(?=.*[A-Z])(?=.*[a-z])\w.{5,18}\w)', password1):
                  return {"message": 'Password unsafe, must contain a number, uppercase, lowercase and minimum 7 characters'}, 400
             password1 = sha256(password1.encode('utf-8')).hexdigest()
-            #password1 = str(hash(password1))
             new_user = User(username=username, 
                             password=password1,  
                             email=email)
@@ -42,17 +40,50 @@ class SignUpView(Resource):
             return {"message": 'All fields are needed'}, 400
         except Exception as e:
             return {"message": 'Internal server error', "error": e}, 500
-        return {"message": 'User created successfully'}
+        return {"message": 'User created successfully'}, 201
 
 class TasksView(Resource):
 
+    @jwt_required()
     def get(self):
-        return {'mensaje':'Recuperar todas las tareas'}, 200
+        current_user_id = get_jwt_identity()
+
+        tasks = Task.query.filter(Task.user_id == current_user_id).all()
+
+        task_schema = TaskSchema()
+
+        return [task_schema.dump(task) for task in tasks]
+    
+    @jwt_required()
+    def post(self):
+        current_user_id = get_jwt_identity()
+
+        new_task = Task(
+            name = "Video test",
+            user_id = current_user_id
+        )
+
+        db.session.add(new_task)
+        db.session.commit()
+
+        return {"message": 'Task created successfully'}, 201
     
 class TaskView(Resource):
 
+    @jwt_required()
     def get(self, id_task):
-        return {'mensaje':'Recuperar tarea ' + str(id_task)}, 200
+        task = Task.query.filter(Task.id == id_task).first()
+
+        task_schema = TaskSchema()
+
+        return task_schema.dump(task)
     
+    @jwt_required()
     def delete(self, id_task):
-        return {'mensaje':'Eliminar tarea ' + str(id_task)}, 200
+        task = Task.query.filter(Task.id == id_task).first()
+        if task:
+            db.session.delete(task)
+            db.session.commit() 
+            return {'message':'Task deleted successfully ' + str(id_task)}, 200
+        else:
+            return {'message':'Task not deleted ' + str(id_task)}, 200
