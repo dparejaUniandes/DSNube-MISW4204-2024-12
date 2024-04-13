@@ -11,9 +11,9 @@ class TaskStatus(enum.Enum):
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String, nullable=False)
+    username = db.Column(db.String, nullable=False, unique=True)
     password = db.Column(db.String, nullable=False)
-    email = db.Column(db.String, nullable=False)
+    email = db.Column(db.String, nullable=False, unique=True)
     tasks = db.relationship('Task', backref='user', lazy=True)
 
 class Task(db.Model):
