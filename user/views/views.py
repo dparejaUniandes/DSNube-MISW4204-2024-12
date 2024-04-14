@@ -1,5 +1,6 @@
 import re
 import os
+import uuid
 from flask import request
 from flask_restful import Resource
 from sqlalchemy.exc import IntegrityError
@@ -7,7 +8,9 @@ from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_requir
 from werkzeug.utils import secure_filename
 from hashlib import sha256
 from models import *
-import cv2
+from celery import Celery
+
+celery_app = Celery('tasks', broker='redis://redis:6379')
 
 class LogInView(Resource):
     def post(self):
@@ -20,7 +23,6 @@ class LogInView(Resource):
         return {'message':'Successful login', "token": token}, 200
     
 class SignUpView(Resource):
-    
     def post(self):
         try:
             username = str(request.json["username"])
@@ -61,8 +63,10 @@ class TasksView(Resource):
         return [task_schema.dump(task) for task in tasks]
     
     @jwt_required()
+    @celery_app.task(name="app.workers.process-video")
     def post(self):
         current_user_id = get_jwt_identity()
+        _uuid = str(uuid.uuid4())
         
         if 'video' not in request.files:
             return {'message': 'No video file provided'}, 400
@@ -72,7 +76,7 @@ class TasksView(Resource):
             return {'message': 'No video file selected'}, 400
         
         filename = secure_filename(video_file.filename)
-        pre_processed_filename = f"pre_processed_{filename}"
+        pre_processed_filename = f"pre_processed_{_uuid}_{filename}"
         video_path = os.path.join('videos', pre_processed_filename)
         video_file.save(video_path)
 
@@ -81,65 +85,11 @@ class TasksView(Resource):
             user_id= current_user_id,
             video_path= video_path
         )
-        
-        # Ruta del logo
-        logo_path = 'logo.png'
-
-        try:
-            # Cargar el video
-            video = cv2.VideoCapture(video_path)
-
-            # Cargar el logo
-            logo = cv2.imread(logo_path)
-
-            # Obtener las propiedades del video
-            fps = video.get(cv2.CAP_PROP_FPS)
-            width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
-            height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-            # Calcular el nuevo ancho y alto para una relación de aspecto de 16:9
-            new_width = width
-            new_height = int(width * 9 / 16)
-
-            # Calcular los márgenes superior e inferior para centrar el video
-            top_margin = int((height - new_height) / 2)
-            bottom_margin = height - new_height - top_margin
-
-            # Redimensionar el logo al tamaño del video recortado
-            logo = cv2.resize(logo, (new_width, new_height))
-
-            # Crear el objeto de escritura de video
-            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-            output_video = cv2.VideoWriter('video_recortado.mp4', fourcc, fps, (new_width, new_height))
-
-            # Calcular la duración máxima en frames (20 segundos)
-            max_duration = int(fps * 20)
-
-            # Procesar el video
-            output_video.write(logo)
-            frame_count = 0
-            while frame_count < max_duration:
-                ret, frame = video.read()
-                if not ret:
-                    break
-
-                # Recortar el video a la relación de aspecto de 16:9
-                cropped_frame = frame[top_margin:top_margin+new_height, :]
-
-                # Escribir el frame en el video de salida
-                output_video.write(cropped_frame)
-
-                frame_count += 1
-            output_video.write(logo)
-
-        finally:
-            # Liberar los recursos
-            video.release()
-            output_video.release()
-            cv2.destroyAllWindows()
 
         db.session.add(new_task)
         db.session.commit()
+
+        celery_app.send_task('process_video', args=[video_path, f"{_uuid}_{filename}", new_task.id])
 
         return {"message": 'Task created successfully'}, 201
     

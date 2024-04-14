@@ -13,5 +13,5 @@ Werkzeug==2.2.2
 flask-jwt-extended
 flask_jwt_extended
 gunicorn
-numpy==1.26.4
-opencv-python==4.9.0.80
+celery==5.2.7
+redis==4.5.4

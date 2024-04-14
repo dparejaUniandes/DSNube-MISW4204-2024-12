@@ -45,8 +45,7 @@ services:
     container_name: worker
     build: ./worker
     environment:
-      - FLASK_APP=app.py
-      - FLASK_DEBUG=1
+      - CELERY_BROKER_URL=redis://redis_broker:6379
     volumes:
       - ./worker:/app
       - ./videos:/app/videos

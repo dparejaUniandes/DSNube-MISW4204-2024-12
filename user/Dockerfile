@@ -7,9 +7,6 @@ WORKDIR /app
 # Copy the requirements file to the container
 COPY requirements.txt .
 
-# Install ffmpeg
-RUN apt-get update && apt-get install -y ffmpeg
-
 # Install the dependencies && force Gunicorn
 RUN pip install --no-cache-dir -r requirements.txt
 

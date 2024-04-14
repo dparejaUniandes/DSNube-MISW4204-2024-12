@@ -2,15 +2,14 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
+RUN apt-get update && apt-get install -y ffmpeg
+
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir gunicorn
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-ENV FLASK_APP=app.py
-ENV FLASK_DEBUG=1
-ENV DEBUG=true
+ENV CELERY_BROKER_URL=redis://redis_broker:6379
 
 # CMD ["flask", "run", "--host=0.0.0.0"]
-CMD ["gunicorn", "--bind", "0.0.0.0:5001", "--limit-request-line", "26214400", "--limit-request-field_size", "26214400", "--keep-alive", "5", "app:app"]
+CMD ["celery", "-A", "tasks", "worker", "--loglevel=info"]
