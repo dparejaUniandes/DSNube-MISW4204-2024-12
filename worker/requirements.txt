@@ -1,0 +1,11 @@
+Flask==2.2.2
+Flask-RESTful==0.3.9
+Flask-SQLAlchemy==3.0.3
+flask-marshmallow==0.14.0
+marshmallow==3.19.0
+marshmallow-enum==1.5.1
+marshmallow-sqlalchemy==0.28.1
+SQLAlchemy==2.0.2
+Werkzeug==2.2.2
+psycopg2-binary==2.9.5
+gunicorn

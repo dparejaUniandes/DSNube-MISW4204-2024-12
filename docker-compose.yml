@@ -40,6 +40,21 @@ services:
     depends_on: 
        db:
         condition: service_healthy
+
+  worker:
+    container_name: worker
+    build: ./worker
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_DEBUG=1
+    volumes:
+      - ./worker:/app
+      - ./videos:/app/videos
+    networks:
+      - idrl-network
+    depends_on:
+      - db
+      - redis
       
   api-gateway:
     image: nginx:latest
