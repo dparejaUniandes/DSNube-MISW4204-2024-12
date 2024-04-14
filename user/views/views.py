@@ -2,7 +2,7 @@ import re
 import os
 from flask import request
 from flask_restful import Resource
-from sqlalchemy import exc
+from sqlalchemy.exc import IntegrityError
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from werkzeug.utils import secure_filename
 from hashlib import sha256
@@ -36,11 +36,14 @@ class SignUpView(Resource):
                             email=email)
             db.session.add(new_user)
             db.session.commit()
-        except exc.IntegrityError:
+
+        except IntegrityError as e:
+            db.session.rollback()
             return {"message": 'Email or username already exists'}, 422
         except KeyError:
             return {"message": 'All fields are needed'}, 400
         except Exception as e:
+            db.session.rollback()
             return {"message": 'Internal server error', "error": e}, 500
         return {"message": 'User created successfully'}, 201
 
