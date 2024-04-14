@@ -1,10 +1,12 @@
-from flask_restful import Resource
-from ..models import *
-from flask import request
-from sqlalchemy import exc
 import re
+import os
+from flask import request
+from flask_restful import Resource
+from sqlalchemy import exc
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from werkzeug.utils import secure_filename
 from hashlib import sha256
+from models import *
 
 class LogInView(Resource):
     def post(self):
@@ -57,10 +59,23 @@ class TasksView(Resource):
     @jwt_required()
     def post(self):
         current_user_id = get_jwt_identity()
+        
+        if 'video' not in request.files:
+            return {'message': 'No video file provided'}, 400
+        
+        video_file = request.files['video']
+        if video_file.filename == '':
+            return {'message': 'No video file selected'}, 400
+        
+        filename = secure_filename(video_file.filename)
+        pre_processed_filename = f"pre_processed_{filename}"
+        video_path = os.path.join('videos', pre_processed_filename)
+        video_file.save(video_path)
 
         new_task = Task(
-            name = "Video test",
-            user_id = current_user_id
+            name= pre_processed_filename,
+            user_id= current_user_id,
+            video_path= video_path
         )
 
         db.session.add(new_task)

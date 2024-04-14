@@ -7,8 +7,9 @@ WORKDIR /app
 # Copy the requirements file to the container
 COPY requirements.txt .
 
-# Install the dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Install the dependencies && force Gunicorn
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir gunicorn
 
 # Copy the application code to the container
 COPY . .
@@ -22,4 +23,5 @@ ENV FLASK_DEBUG=1
 ENV DEBUG=true
 
 # Run the Flask application
-CMD ["flask", "run", "--host=0.0.0.0", "--debugger"]
+# CMD ["flask", "run", "--host=0.0.0.0", "--debugger"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--limit-request-line", "26214400", "--limit-request-field_size", "26214400", "--keep-alive", "5", "app:app"]
