@@ -22,7 +22,7 @@ docker-compose up
 
 ## Usage
 
-Once the Docker containers are up and running, the FastAPI application will be available at http://localhost:81/
+Once the Docker containers are up and running, application will be available at http://localhost:81/
 
 ## API Endpoints
 
