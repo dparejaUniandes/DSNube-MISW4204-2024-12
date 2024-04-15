@@ -1,5 +1,6 @@
 import re
 import os
+import uuid
 from flask import request
 from flask_restful import Resource
 from sqlalchemy.exc import IntegrityError
@@ -7,6 +8,9 @@ from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_requir
 from werkzeug.utils import secure_filename
 from hashlib import sha256
 from models import *
+from celery import Celery
+
+celery_app = Celery('tasks', broker='redis://redis:6379')
 
 class LogInView(Resource):
     def post(self):
@@ -19,7 +23,6 @@ class LogInView(Resource):
         return {'message':'Successful login', "token": token}, 200
     
 class SignUpView(Resource):
-    
     def post(self):
         try:
             username = str(request.json["username"])
@@ -60,8 +63,10 @@ class TasksView(Resource):
         return [task_schema.dump(task) for task in tasks]
     
     @jwt_required()
+    @celery_app.task(name="app.workers.process-video")
     def post(self):
         current_user_id = get_jwt_identity()
+        _uuid = str(uuid.uuid4())
         
         if 'video' not in request.files:
             return {'message': 'No video file provided'}, 400
@@ -71,7 +76,7 @@ class TasksView(Resource):
             return {'message': 'No video file selected'}, 400
         
         filename = secure_filename(video_file.filename)
-        pre_processed_filename = f"pre_processed_{filename}"
+        pre_processed_filename = f"pre_processed_{_uuid}_{filename}"
         video_path = os.path.join('videos', pre_processed_filename)
         video_file.save(video_path)
 
@@ -84,6 +89,8 @@ class TasksView(Resource):
         db.session.add(new_task)
         db.session.commit()
 
+        celery_app.send_task('process_video', args=[video_path, f"{_uuid}_{filename}", str(new_task.id)])
+
         return {"message": 'Task created successfully'}, 201
     
 class TaskView(Resource):
@@ -95,6 +102,16 @@ class TaskView(Resource):
         task_schema = TaskSchema()
 
         return task_schema.dump(task)
+    
+    def put(self, id_task):
+        task = Task.query.filter(Task.id == id_task).first()
+
+        task.status = TaskStatus.PROCESSED
+        task.name = request.json["name"]
+        task.video_path = request.json["video_path"]
+
+        #db.session.update(task)
+        db.session.commit() 
     
     @jwt_required()
     def delete(self, id_task):
