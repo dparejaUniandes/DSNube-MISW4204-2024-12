@@ -30,10 +30,26 @@ The API includes the following endpoints:
 
 - **User Authentication**
     - `POST /user/api/auth/signup`: Sign up a new user.
+    - **JSON BODY**: <br>
+        `{
+    "username": "username",
+    "password1": "12345dA",
+    "password2": "12345dA",
+    "email": "username@gmail.com"
+}`
     - `POST /user/api/auth/login`: Log in and receive an access token.
+    - **JSON BODY** <br>
+    {
+    "username": "username",
+    "password": "12345dA"
+}
 
 - **Task Management**
     - `GET /user/api/tasks`: Get a list of tasks.
-    - `POST /user/api/tasks`: Create a new task.
+    - `POST /user/api/tasks`: Create a new task. For upload the a file, is neccesary select the form-data option, put video in Key column, in Value column select the vide, like this:<img width="864" alt="image" src="https://github.com/dparejaUniandes/DSNube-MISW4204-2024-12/assets/142551793/2f5e3962-2e68-41ba-929a-1d4ece27af59">
+
     - `GET /user/api/tasks/{id_task}`: Retrieve details of a specific task.
     - `DELETE /user/api/tasks/{id_task}`: Delete a specific task.
+
+ - **Download collection**
+ - For download, see the wiki page: https://github.com/dparejaUniandes/DSNube-MISW4204-2024-12/wiki
