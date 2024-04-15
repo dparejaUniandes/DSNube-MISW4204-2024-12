@@ -1,5 +1,7 @@
 from celery import Celery
 import cv2
+import requests
+from requests.exceptions import RequestException
 
 celery_app = Celery('tasks', broker='redis://redis_broker:6379')
 
@@ -40,6 +42,20 @@ def process_video(video_path, filename, task_id):
 
             frame_count += 1
         output_video.write(logo)
+
+        url = f"http://user:5000/api/tasks/uploaded/{task_id}"
+        data = {
+            "name": f"processed_{filename}",
+            "video_path": f"videos/processed_{filename}"
+        }
+        
+        try:
+            response = requests.put(url, json=data)
+            response.raise_for_status()
+            print(f"Tarea {task_id} actualizada exitosamente")
+        except RequestException as e:
+            print(f"Error al actualizar la tarea {task_id}: {str(e)}")
+            raise self.retry(exc=e, countdown=60)
 
     finally:
         video.release()
