@@ -37,6 +37,3 @@ The API includes the following endpoints:
     - `POST /user/api/tasks`: Create a new task.
     - `GET /user/api/tasks/{id_task}`: Retrieve details of a specific task.
     - `DELETE /user/api/tasks/{id_task}`: Delete a specific task.
-
-
-This README simplifies the setup process by focusing on the Docker setup, which is what you wanted for the tutor. It avoids the need for manual database setup, Python virtual environment setup, or manual installation of dependencies. The tutor just needs Docker installed, and then they can clone the project, build and run the Docker containers, and access the application and API documentation through their web browser.
