@@ -5,7 +5,7 @@ from requests.exceptions import RequestException
 
 celery_app = Celery('tasks', broker='redis://redis_broker:6379')
 
-@celery_app.task(name='process_video')
+@celery_app.task(bind=True, name='process_video')
 def process_video(self, video_path, filename, task_id):
     logo_path = 'videos/logo.png'
 
@@ -43,7 +43,7 @@ def process_video(self, video_path, filename, task_id):
             frame_count += 1
         output_video.write(logo)
 
-        url = f"http://user:5000/api/task/{task_id}"
+        url = f"http://user:5000/api/tasks/{task_id}"
         data = {
             "name": f"processed_{filename}",
             "video_path": f"videos/processed_{filename}"

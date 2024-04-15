@@ -89,7 +89,7 @@ class TasksView(Resource):
         db.session.add(new_task)
         db.session.commit()
 
-        celery_app.send_task('process_video', args=[video_path, f"{_uuid}_{filename}", new_task.id])
+        celery_app.send_task('process_video', args=[video_path, f"{_uuid}_{filename}", str(new_task.id)])
 
         return {"message": 'Task created successfully'}, 201
     
