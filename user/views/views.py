@@ -103,6 +103,16 @@ class TaskView(Resource):
 
         return task_schema.dump(task)
     
+    def put(self, id_task):
+        task = Task.query.filter(Task.id == id_task).first()
+
+        task.status = TaskStatus.PROCESSED
+        task.name = request.json["name"]
+        task.video_path = request.json["video_path"]
+
+        #db.session.update(task)
+        db.session.commit() 
+    
     @jwt_required()
     def delete(self, id_task):
         task = Task.query.filter(Task.id == id_task).first()
