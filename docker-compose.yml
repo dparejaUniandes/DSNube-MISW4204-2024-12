@@ -40,6 +40,20 @@ services:
     depends_on: 
        db:
         condition: service_healthy
+
+  worker:
+    container_name: worker
+    build: ./worker
+    environment:
+      - CELERY_BROKER_URL=redis://redis_broker:6379
+    volumes:
+      - ./worker:/app
+      - ./videos:/app/videos
+    networks:
+      - idrl-network
+    depends_on:
+      - db
+      - redis
       
   api-gateway:
     image: nginx:latest
