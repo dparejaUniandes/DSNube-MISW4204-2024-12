@@ -37,9 +37,6 @@ services:
       - ./videos:/app/videos
     networks:
       - idrl-network
-    depends_on: 
-       db:
-        condition: service_healthy
 
   worker:
     container_name: worker
