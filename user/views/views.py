@@ -78,7 +78,7 @@ class TasksView(Resource):
         
         filename = secure_filename(video_file.filename)
         pre_processed_filename = f"pre_processed_{_uuid}_{filename}"
-        video_path = os.path.join('videos', pre_processed_filename)
+        video_path = os.path.join('/home/ing_manu/DSNube-MISW4204-2024-12/videos', pre_processed_filename)
         video_file.save(video_path)
 
         new_task = Task(
