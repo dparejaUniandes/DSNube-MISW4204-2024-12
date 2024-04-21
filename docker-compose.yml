@@ -32,6 +32,7 @@ services:
     build: ./user
     environment:
         DB_URL: postgresql://postgres:postgres@db:5432/postgres
+        CELERY_BROKER_URL: redis://redis:6379
     volumes:
       - ./user:/app
       - ./videos:/app/videos
@@ -45,7 +46,7 @@ services:
     container_name: worker
     build: ./worker
     environment:
-      - CELERY_BROKER_URL=redis://redis_broker:6379
+      CELERY_BROKER_URL: redis://redis_broker:6379
     volumes:
       - ./worker:/app
       - ./videos:/app/videos
