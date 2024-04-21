@@ -26,7 +26,7 @@ def process_video(self, video_path, filename, task_id):
         logo = cv2.resize(logo, (new_width, new_height))
 
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        output_video = cv2.VideoWriter(f"videos/processed_{filename}", fourcc, fps, (new_width, new_height))
+        output_video = cv2.VideoWriter(f"/home/ing_manu/remote-videos/processed_{filename}", fourcc, fps, (new_width, new_height))
 
         max_duration = int(fps * 20)
 
