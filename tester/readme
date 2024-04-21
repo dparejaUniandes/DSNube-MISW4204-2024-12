@@ -15,14 +15,14 @@
    - Coloca estos archivos en el mismo directorio que el script de Python.
 
 2. **Configurar los endpoints**
-   - Abre el script de Python `load_test_script.py` en un editor de texto.
+   - Abre el script de Python `tester.py` en un editor de texto.
    - Revisa las variables `signup_url`, `login_url` y `tasks_url` con las URLs correspondientes a los endpoints que vamos a probar.
 
 3. **Ejecutar las pruebas de carga**
    - Abre una terminal o línea de comandos y navega hasta el directorio donde se encuentra el script de Python.
    - Ejecuta el script utilizando el siguiente comando:
      ```
-     python load_test_script.py
+     python tester.py
      ```
    - El script realizará las pruebas de carga en los endpoints configurados y generará un archivo CSV con los resultados llamado `load_test_results.csv`.
 
