@@ -8,6 +8,9 @@ import requests
 signup_url = "http://localhost:81/user/api/auth/signup"
 login_url = "http://localhost:81/user/api/auth/login"
 tasks_url = "http://localhost:81/user/api/tasks"
+# signup_url = "http://34.132.255.5:8080/api/auth/signup"
+# login_url = "http://34.132.255.5:8080/api/auth/login"
+# tasks_url = "http://34.132.255.5:8080/api/tasks"
 
 signup_data_file = "signup_data.json"
 login_data_file = "login_data.json"
@@ -48,7 +51,15 @@ def run_load_test(url, requests, concurrency, data_file=None, header=None):
   command += f" {url}"
   process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   output, error = process.communicate()
-  return output.decode("utf-8"), error.decode("utf-8")
+
+  try:
+    output_decoded = output.decode("utf-8")
+    error_decoded = error.decode("utf-8")
+  except UnicodeDecodeError:
+    output_decoded = output.decode("latin-1")
+    error_decoded = error.decode("latin-1")
+
+  return output_decoded, error_decoded
 
 def extract_values(output):
   lines = output.split("\n")
