@@ -8,6 +8,7 @@ celery_app = Celery('tasks', broker=environ.get('CELERY_BROKER_URL'))
 
 @celery_app.task(bind=True, name='process_video')
 def process_video(self, video_path, filename, task_id):
+    print("******, ", video_path)
     logo_path = 'videos/logo.png'
 
     try:
