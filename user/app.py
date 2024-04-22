@@ -27,8 +27,8 @@ api.add_resource(TaskView, '/api/tasks/<int:id_task>')
 api.add_resource(SignUpView, '/api/auth/signup')
 api.add_resource(LogInView, '/api/auth/login')
 
-@app.route("/uploads/<path:name>")
+@app.route("/videos/<path:name>")
 def download_file(name):
     return send_from_directory(
-        '/home/ing_manu/remote-videos', name
+        '/home/ing_manu/remote-videos', name, as_attachment=True
     )
