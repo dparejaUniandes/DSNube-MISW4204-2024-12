@@ -45,7 +45,7 @@ def process_video(self, video_path, filename, task_id):
             frame_count += 1
         output_video.write(logo)
 
-        url = f"http://user:5000/api/tasks/{task_id}"
+        url = f"http://34.132.255.5:8080/api/tasks/{task_id}"
         data = {
             "name": f"processed_{filename}",
             "video_path": f"videos/processed_{filename}"
