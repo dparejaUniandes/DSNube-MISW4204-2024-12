@@ -2,11 +2,13 @@ from celery import Celery
 import cv2
 import requests
 from requests.exceptions import RequestException
+from os import environ
 
-celery_app = Celery('tasks', broker='redis://redis_broker:6379')
+celery_app = Celery('tasks', broker=environ.get('CELERY_BROKER_URL'))
 
 @celery_app.task(bind=True, name='process_video')
 def process_video(self, video_path, filename, task_id):
+    print("******, ", video_path)
     logo_path = 'videos/logo.png'
 
     try:
@@ -25,7 +27,7 @@ def process_video(self, video_path, filename, task_id):
         logo = cv2.resize(logo, (new_width, new_height))
 
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        output_video = cv2.VideoWriter(f"videos/processed_{filename}", fourcc, fps, (new_width, new_height))
+        output_video = cv2.VideoWriter(f"/home/ing_manu/remote-videos/processed_{filename}", fourcc, fps, (new_width, new_height))
 
         max_duration = int(fps * 20)
 
@@ -43,7 +45,7 @@ def process_video(self, video_path, filename, task_id):
             frame_count += 1
         output_video.write(logo)
 
-        url = f"http://user:5000/api/tasks/{task_id}"
+        url = f"http://34.132.255.5:8080/api/tasks/{task_id}"
         data = {
             "name": f"processed_{filename}",
             "video_path": f"videos/processed_{filename}"

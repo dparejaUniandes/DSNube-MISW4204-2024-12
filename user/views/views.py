@@ -9,8 +9,9 @@ from werkzeug.utils import secure_filename
 from hashlib import sha256
 from models import *
 from celery import Celery
+from os import environ
 
-celery_app = Celery('tasks', broker='redis://redis:6379')
+celery_app = Celery('tasks', broker=environ.get('CELERY_BROKER_URL'))
 
 class LogInView(Resource):
     def post(self):
@@ -77,7 +78,7 @@ class TasksView(Resource):
         
         filename = secure_filename(video_file.filename)
         pre_processed_filename = f"pre_processed_{_uuid}_{filename}"
-        video_path = os.path.join('videos', pre_processed_filename)
+        video_path = os.path.join('/home/ing_manu/remote-videos', pre_processed_filename)
         video_file.save(video_path)
 
         new_task = Task(
