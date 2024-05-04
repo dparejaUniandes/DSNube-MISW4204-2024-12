@@ -5,7 +5,7 @@ from requests.exceptions import RequestException
 from os import environ, remove
 from google.cloud import storage
 
-celery_app = Celery('tasks', broker=environ.get('CELERY_BROKER_URL'))
+celery_app = Celery('tasks', broker="redis://10.128.0.23:6379")
 
 @celery_app.task(bind=True, name='process_video')
 def process_video(self, video_path, filename, task_id):
