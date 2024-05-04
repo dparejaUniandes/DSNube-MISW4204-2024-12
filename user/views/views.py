@@ -10,7 +10,7 @@ from hashlib import sha256
 from models import *
 from celery import Celery
 from os import environ
-from gcloud import storage
+from google.cloud import storage
 
 celery_app = Celery('tasks', broker=environ.get('CELERY_BROKER_URL'))
 
