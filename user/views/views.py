@@ -98,9 +98,12 @@ class TasksView(Resource):
         db.session.add(new_task)
         db.session.commit()
 
-        celery_app.send_task('process_video', args=[video_path, f"{_uuid}_{filename}", str(new_task.id)])
-
-        return {"message": 'Task created successfully'}, 201
+        try:
+            celery_app.send_task('process_video', args=[video_path, f"{_uuid}_{filename}", str(new_task.id)])
+            return {"message": 'Task created successfully'}, 201
+        except Exception as e:
+            print(f"Error al enviar la tarea a Celery: {str(e)}")
+            return {"message": 'Error creating task'}, 500
     
 class TaskView(Resource):
 
