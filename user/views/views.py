@@ -12,7 +12,7 @@ from celery import Celery
 from os import environ
 from google.cloud import storage
 
-celery_app = Celery('tasks', broker=environ.get('CELERY_BROKER_URL'))
+celery_app = Celery('tasks', broker="redis://35.222.23.129:6379")
 
 class LogInView(Resource):
     def post(self):
