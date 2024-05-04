@@ -82,17 +82,17 @@ class TasksView(Resource):
         video_path = os.path.join('videos', pre_processed_filename)
 
         bucket_name = 'fancy-store-folkloric-union-420902'
-        generation_match_precondition = 0
 
         storage_client = storage.Client()
         bucket = storage_client.bucket(bucket_name)
-        blob = bucket.blob(video_path)
-        blob.upload_from_filename(video_path, if_generation_match=generation_match_precondition)
+        blob = bucket.blob(pre_processed_filename)
+        blob.upload_from_file(video_file)
+        video_url = blob.public_url
 
         new_task = Task(
-            name= pre_processed_filename,
-            user_id= current_user_id,
-            video_path= video_path
+            name = pre_processed_filename,
+            user_id = current_user_id,
+            video_path = video_url
         )
 
         db.session.add(new_task)
