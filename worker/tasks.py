@@ -9,7 +9,7 @@ celery_app = Celery('tasks', broker="redis://10.128.0.23:6379")
 
 @celery_app.task(bind=True, name='process_video')
 def process_video(self, video_path, filename, task_id):
-    print("******, ", video_path)
+    print("*****, ", video_path)
     logo_path = 'videos/logo.png'
 
     bucket_name = 'fancy-store-folkloric-union-420902'
