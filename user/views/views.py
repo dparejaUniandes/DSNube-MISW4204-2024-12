@@ -81,11 +81,11 @@ class TasksView(Resource):
         pre_processed_filename = f"pre_processed_{_uuid}_{filename}"
         video_path = os.path.join('videos', pre_processed_filename)
 
-        bucket_name = 'fancy-store-folkloric-union-420902'
+        bucket_name = 'fancy-store-folkloric-union-420902x'
 
         storage_client = storage.Client()
         bucket = storage_client.bucket(bucket_name)
-        blob = bucket.blob('videos/' + pre_processed_filename)
+        blob = bucket.blob(pre_processed_filename)
         blob.upload_from_file(video_file)
         video_url = blob.public_url
 
