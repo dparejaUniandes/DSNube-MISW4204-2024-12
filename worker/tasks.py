@@ -2,7 +2,7 @@ from celery import Celery
 import cv2
 import requests
 from requests.exceptions import RequestException
-from os import environ
+from os import environ, remove
 from google.cloud import storage
 
 celery_app = Celery('tasks', broker=environ.get('CELERY_BROKER_URL'))
@@ -16,12 +16,13 @@ def process_video(self, video_path, filename, task_id):
 
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
+    temp_video_path = '/tmp/' + filename
 
     try:
-        blob = bucket.blob("videos/" + filename)
-        blob.download_to_filename('/tmp/' + filename)
+        blob = bucket.blob("videos/pre_processed_" + filename)
+        blob.download_to_filename(temp_video_path)
 
-        video = cv2.VideoCapture('/tmp/' + filename)
+        video = cv2.VideoCapture(temp_video_path)
         logo = cv2.imread(logo_path)
 
         fps = video.get(cv2.CAP_PROP_FPS)
@@ -36,7 +37,8 @@ def process_video(self, video_path, filename, task_id):
         logo = cv2.resize(logo, (new_width, new_height))
 
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        output_video = cv2.VideoWriter(f"/tmp/processed_{filename}", fourcc, fps, (new_width, new_height))
+        temp_output_path = f"/tmp/processed_{filename}"
+        output_video = cv2.VideoWriter(temp_output_path, fourcc, fps, (new_width, new_height))
 
         max_duration = int(fps * 20)
 
@@ -75,3 +77,7 @@ def process_video(self, video_path, filename, task_id):
         video.release()
         output_video.release()
         cv2.destroyAllWindows()
+
+        # Borrar los archivos temporales
+        remove(temp_video_path)
+        remove(temp_output_path)
