@@ -22,7 +22,7 @@ def process_video(self, video_path, filename, task_id):
         blob = bucket.blob("videos/pre_processed_" + filename)
         blob.download_to_filename(temp_video_path)
 
-        video = cv2.VideoCapture(video_path)
+        video = cv2.VideoCapture(temp_video_path)
         logo = cv2.imread(logo_path)
 
         fps = video.get(cv2.CAP_PROP_FPS)
