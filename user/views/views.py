@@ -85,7 +85,7 @@ class TasksView(Resource):
 
         storage_client = storage.Client()
         bucket = storage_client.bucket(bucket_name)
-        blob = bucket.blob(pre_processed_filename)
+        blob = bucket.blob(video_path)
         blob.upload_from_file(video_file)
         video_url = blob.public_url
 
