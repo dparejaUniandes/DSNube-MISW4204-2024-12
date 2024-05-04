@@ -10,6 +10,7 @@ from hashlib import sha256
 from models import *
 from celery import Celery
 from os import environ
+from google.cloud import storage
 
 celery_app = Celery('tasks', broker=environ.get('CELERY_BROKER_URL'))
 
@@ -78,13 +79,20 @@ class TasksView(Resource):
         
         filename = secure_filename(video_file.filename)
         pre_processed_filename = f"pre_processed_{_uuid}_{filename}"
-        video_path = os.path.join('/home/ing_manu/remote-videos', pre_processed_filename)
-        video_file.save(video_path)
+        video_path = os.path.join('videos', pre_processed_filename)
+
+        bucket_name = 'fancy-store-folkloric-union-420902'
+
+        storage_client = storage.Client()
+        bucket = storage_client.bucket(bucket_name)
+        blob = bucket.blob(pre_processed_filename)
+        blob.upload_from_file(video_file)
+        video_url = blob.public_url
 
         new_task = Task(
-            name= pre_processed_filename,
-            user_id= current_user_id,
-            video_path= video_path
+            name = pre_processed_filename,
+            user_id = current_user_id,
+            video_path = video_url
         )
 
         db.session.add(new_task)
