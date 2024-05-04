@@ -78,5 +78,5 @@ def process_video(self, video_path, filename, task_id):
         output_video.release()
         cv2.destroyAllWindows()
         # Borrar los archivos temporales
-        remove(temp_video_path)
-        remove(temp_output_path)
+        # remove(temp_video_path)
+        # remove(temp_output_path)
