@@ -12,7 +12,7 @@ from celery import Celery
 from os import environ
 from google.cloud import storage
 
-celery_app = Celery('tasks', broker="redis://35.222.23.129:6379")
+celery_app = Celery('tasks', broker="redis://34.71.71.115:6379")
 
 class LogInView(Resource):
     def post(self):
@@ -81,7 +81,7 @@ class TasksView(Resource):
         pre_processed_filename = f"pre_processed_{_uuid}_{filename}"
         video_path = os.path.join('videos', pre_processed_filename)
 
-        bucket_name = 'fancy-store-folkloric-union-420902'
+        bucket_name = 'bucket-fpv'
 
         storage_client = storage.Client()
         bucket = storage_client.bucket(bucket_name)
