@@ -1,3 +1,4 @@
+from tempfile import NamedTemporaryFile
 from celery import Celery
 import cv2
 import requests
@@ -5,14 +6,14 @@ from requests.exceptions import RequestException
 from os import environ, remove
 from google.cloud import storage
 
-celery_app = Celery('tasks', broker="redis://10.128.0.23:6379")
+celery_app = Celery('tasks', broker="redis://10.128.0.20:6379")
 
 @celery_app.task(bind=True, name='process_video')
 def process_video(self, video_path, filename, task_id):
     print("*****, ", video_path)
     logo_path = 'videos/logo.png'
 
-    bucket_name = 'fancy-store-folkloric-union-420902'
+    bucket_name = 'bucket-fpv'
 
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
@@ -37,27 +38,24 @@ def process_video(self, video_path, filename, task_id):
         logo = cv2.resize(logo, (new_width, new_height))
 
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        temp_output_path = f"/tmp/processed_{filename}"
-        output_video = cv2.VideoWriter(temp_output_path, fourcc, fps, (new_width, new_height))
-
-        max_duration = int(fps * 20)
-
-        output_video.write(logo)
-        frame_count = 0
-        while frame_count < max_duration:
-            ret, frame = video.read()
-            if not ret:
-                break
-
-            cropped_frame = frame[top_margin:top_margin+new_height, :]
-
-            output_video.write(cropped_frame)
-
-            frame_count += 1
-        output_video.write(logo)
-        processed_blob_name = f"videos/processed_{filename}"
-        processed_blob = bucket.blob(processed_blob_name)
-        processed_blob.upload_from_filename(f"/tmp/processed_{filename}")
+        with NamedTemporaryFile(delete=False, suffix='.mp4') as temp_output:
+            output_video = cv2.VideoWriter(temp_output.name, fourcc, fps, (new_width, new_height))
+            max_duration = int(fps * 20)
+            output_video.write(logo)
+            frame_count = 0
+            while frame_count < max_duration:
+                ret, frame = video.read()
+                if not ret:
+                    break
+                cropped_frame = frame[top_margin:top_margin+new_height, :]
+                output_video.write(cropped_frame)
+                frame_count += 1
+            output_video.write(logo)
+            output_video.release()
+            
+            processed_blob_name = f"videos/processed_{filename}"
+            processed_blob = bucket.blob(processed_blob_name)
+            processed_blob.upload_from_file(temp_output, rewind=True)
 
         url = f"http://34.41.186.142:8080/api/tasks/{task_id}"
         data = {
@@ -80,4 +78,4 @@ def process_video(self, video_path, filename, task_id):
 
         # Borrar los archivos temporales
         remove(temp_video_path)
-        remove(temp_output_path)
+        remove(temp_output.name)
