@@ -1,3 +1,4 @@
+from tempfile import NamedTemporaryFile
 from celery import Celery
 import cv2
 import requests
@@ -18,6 +19,7 @@ def process_video(self, video_path, filename, task_id):
     bucket = storage_client.bucket(bucket_name)
     temp_video_path = '/tmp/' + filename
 
+    
     try:
         blob = bucket.blob("videos/pre_processed_" + filename)
         blob.download_to_filename(temp_video_path)
@@ -37,29 +39,26 @@ def process_video(self, video_path, filename, task_id):
         logo = cv2.resize(logo, (new_width, new_height))
 
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        temp_output_path = f"/tmp/processed_{filename}"
-        output_video = cv2.VideoWriter(temp_output_path, fourcc, fps, (new_width, new_height))
+        with NamedTemporaryFile(delete=False, suffix='.mp4') as temp_output:
+            output_video = cv2.VideoWriter(temp_output.name, fourcc, fps, (new_width, new_height))
+            max_duration = int(fps * 20)
+            output_video.write(logo)
+            frame_count = 0
+            while frame_count < max_duration:
+                ret, frame = video.read()
+                if not ret:
+                    break
+                cropped_frame = frame[top_margin:top_margin+new_height, :]
+                output_video.write(cropped_frame)
+                frame_count += 1
+            output_video.write(logo)
+            output_video.release()
+            
+            processed_blob_name = f"videos/processed_{filename}"
+            processed_blob = bucket.blob(processed_blob_name)
+            processed_blob.upload_from_file(temp_output, rewind=True)
 
-        max_duration = int(fps * 20)
-
-        output_video.write(logo)
-        frame_count = 0
-        while frame_count < max_duration:
-            ret, frame = video.read()
-            if not ret:
-                break
-
-            cropped_frame = frame[top_margin:top_margin+new_height, :]
-
-            output_video.write(cropped_frame)
-
-            frame_count += 1
-        output_video.write(logo)
-        processed_blob_name = f"videos/processed_{filename}"
-        processed_blob = bucket.blob(processed_blob_name)
-        processed_blob.upload_from_filename(temp_output_path) 
-
-        url = f"http://35.188.61.182:8080/api/tasks/{task_id}"
+        url = f"http://34.41.186.142:8080/api/tasks/{task_id}"
         data = {
             "name": f"processed_{filename}",
             "video_path": f"videos/processed_{filename}"
@@ -77,6 +76,7 @@ def process_video(self, video_path, filename, task_id):
         video.release()
         output_video.release()
         cv2.destroyAllWindows()
+
         # Borrar los archivos temporales
-        # remove(temp_video_path)
-        # remove(temp_output_path)
+        remove(temp_video_path)
+        remove(temp_output.name)
