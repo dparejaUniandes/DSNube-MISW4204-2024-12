@@ -12,7 +12,7 @@ from celery import Celery
 from os import environ
 from google.cloud import storage
 
-celery_app = Celery('tasks', broker=environ.get('CELERY_BROKER_URL'))
+celery_app = Celery('tasks', broker="redis://35.222.23.129:6379")
 
 class LogInView(Resource):
     def post(self):
@@ -85,7 +85,7 @@ class TasksView(Resource):
 
         storage_client = storage.Client()
         bucket = storage_client.bucket(bucket_name)
-        blob = bucket.blob(pre_processed_filename)
+        blob = bucket.blob(video_path)
         blob.upload_from_file(video_file)
         video_url = blob.public_url
 
@@ -98,9 +98,12 @@ class TasksView(Resource):
         db.session.add(new_task)
         db.session.commit()
 
-        celery_app.send_task('process_video', args=[video_path, f"{_uuid}_{filename}", str(new_task.id)])
-
-        return {"message": 'Task created successfully'}, 201
+        try:
+            celery_app.send_task('process_video', args=[video_path, f"{_uuid}_{filename}", str(new_task.id)])
+            return {"message": 'Task created successfully'}, 201
+        except Exception as e:
+            print(f"Error al enviar la tarea a Celery: {str(e)}")
+            return {"message": 'Error creating task'}, 500
     
 class TaskView(Resource):
 

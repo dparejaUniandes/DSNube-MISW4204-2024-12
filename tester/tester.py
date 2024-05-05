@@ -5,9 +5,9 @@ import os
 import requests
 
 # Configuración de las pruebas de carga
-signup_url = "http://localhost:81/user/api/auth/signup"
-login_url = "http://localhost:81/user/api/auth/login"
-tasks_url = "http://localhost:81/user/api/tasks"
+signup_url = "http://35.188.61.182:8080/api/auth/signup"
+login_url = "http://35.188.61.182:8080/api/auth/login"
+tasks_url = "http://35.188.61.182:8080/api/tasks"
 # signup_url = "http://34.132.255.5:8080/api/auth/signup"
 # login_url = "http://34.132.255.5:8080/api/auth/login"
 # tasks_url = "http://34.132.255.5:8080/api/tasks"
@@ -42,12 +42,14 @@ def get_auth_token():
     raise Exception("Failed to obtain auth token")
 
 # Función para ejecutar las pruebas de carga con Apache Benchmark
-def run_load_test(url, requests, concurrency, data_file=None, header=None):
+def run_load_test(url, requests, concurrency, data_file=None, header=None, video_file=None):
   command = f"ab -n {requests} -c {concurrency}"
   if data_file:
     command += f" -p {data_file}"
   if header:
     command += f' -H "{header}"'
+  if video_file:
+    command += f' -T "video/mp4" -p "{video_file}"'
   command += f" {url}"
   process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   output, error = process.communicate()
@@ -70,6 +72,7 @@ def extract_values(output):
 
 def save_results_to_csv(results):
   endpoints = ["registro", "inicio_de_sesion", "carga_de_video"]
+  # endpoints = ["carga_de_video"]
   
   for endpoint in endpoints:
     file_name = f"load_test_results_{endpoint}.csv"
@@ -96,39 +99,39 @@ load_test_results = []
 
 # Ejecutar las pruebas de carga para cada escenario
 for scenario in scenarios:
-  requests = scenario["requests"]
+  scenarioRequests = scenario["requests"]
   concurrency = scenario["concurrency"]
 
-  # Prueba de carga - registro de usuarios
-  print(f"Ejecutando prueba de carga para el registro de usuarios con {requests} solicitudes y {concurrency} de concurrencia...")
-  output, error = run_load_test(signup_url, requests, concurrency, signup_data_file)
+  # Prueba de estres - registro de usuarios
+  print(f"Ejecutando prueba de estres para el registro de usuarios con {scenarioRequests} solicitudes y {concurrency} de concurrencia...")
+  output, error = run_load_test(signup_url, scenarioRequests, concurrency, signup_data_file)
   print("Resultado:")
   print(output)
   print("Error (si hay alguno):")
   print(error)
   print("---")
-  load_test_results.append({"endpoint": "registro", "requests": requests, "concurrency": concurrency, "output": output})
+  load_test_results.append({"endpoint": "registro", "requests": scenarioRequests, "concurrency": concurrency, "output": output})
 
-  # Prueba de carga - inicio de sesion
-  print(f"Ejecutando prueba de carga para el inicio de sesion con {requests} solicitudes y {concurrency} de concurrencia...")
-  output, error = run_load_test(login_url, requests, concurrency, login_data_file)
+  # Prueba de estres - inicio de sesion
+  print(f"Ejecutando prueba de estres para el inicio de sesion con {scenarioRequests} solicitudes y {concurrency} de concurrencia...")
+  output, error = run_load_test(login_url, scenarioRequests, concurrency, login_data_file)
   print("Resultado:")
   print(output)
   print("Error (si hay alguno):")
   print(error)
   print("---")
-  load_test_results.append({"endpoint": "inicio_de_sesion", "requests": requests, "concurrency": concurrency, "output": output})
+  load_test_results.append({"endpoint": "inicio_de_sesion", "requests": scenarioRequests, "concurrency": concurrency, "output": output})
 
-  # Prueba de carga - carga de video
-  print(f"Ejecutando prueba de carga para la carga de video con {requests} solicitudes y {concurrency} de concurrencia...")
+  # Prueba de estres - carga de video
+  print(f"Ejecutando prueba de estres para la carga de video con {scenarioRequests} solicitudes y {concurrency} de concurrencia...")
   header = f'Authorization: Bearer {auth_token}'
-  output, error = run_load_test(tasks_url, requests, concurrency, header=header, data_file=video_file)
+  output, error = run_load_test(tasks_url, scenarioRequests, concurrency, header=header)
   print("Resultado:")
   print(output)
   print("Error (si hay alguno):")
   print(error)
   print("---")
-  load_test_results.append({"endpoint": "carga_de_video", "requests": requests, "concurrency": concurrency, "output": output})
+  load_test_results.append({"endpoint": "carga_de_video", "requests": scenarioRequests, "concurrency": concurrency, "output": output})
 
 # Guardar los resultados
 save_results_to_csv(load_test_results)

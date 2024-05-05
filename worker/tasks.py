@@ -2,17 +2,27 @@ from celery import Celery
 import cv2
 import requests
 from requests.exceptions import RequestException
-from os import environ
+from os import environ, remove
+from google.cloud import storage
 
-celery_app = Celery('tasks', broker=environ.get('CELERY_BROKER_URL'))
+celery_app = Celery('tasks', broker="redis://10.128.0.23:6379")
 
 @celery_app.task(bind=True, name='process_video')
 def process_video(self, video_path, filename, task_id):
-    print("******, ", video_path)
+    print("*****, ", video_path)
     logo_path = 'videos/logo.png'
 
+    bucket_name = 'fancy-store-folkloric-union-420902'
+
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+    temp_video_path = '/tmp/' + filename
+
     try:
-        video = cv2.VideoCapture(video_path)
+        blob = bucket.blob("videos/pre_processed_" + filename)
+        blob.download_to_filename(temp_video_path)
+
+        video = cv2.VideoCapture(temp_video_path)
         logo = cv2.imread(logo_path)
 
         fps = video.get(cv2.CAP_PROP_FPS)
@@ -27,7 +37,8 @@ def process_video(self, video_path, filename, task_id):
         logo = cv2.resize(logo, (new_width, new_height))
 
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        output_video = cv2.VideoWriter(f"/home/ing_manu/remote-videos/processed_{filename}", fourcc, fps, (new_width, new_height))
+        temp_output_path = f"/tmp/processed_{filename}"
+        output_video = cv2.VideoWriter(temp_output_path, fourcc, fps, (new_width, new_height))
 
         max_duration = int(fps * 20)
 
@@ -44,8 +55,11 @@ def process_video(self, video_path, filename, task_id):
 
             frame_count += 1
         output_video.write(logo)
+        processed_blob_name = f"videos/processed_{filename}"
+        processed_blob = bucket.blob(processed_blob_name)
+        processed_blob.upload_from_filename(f"/tmp/processed_{filename}")
 
-        url = f"http://34.132.255.5:8080/api/tasks/{task_id}"
+        url = f"http://34.41.186.142:8080/api/tasks/{task_id}"
         data = {
             "name": f"processed_{filename}",
             "video_path": f"videos/processed_{filename}"
@@ -63,3 +77,7 @@ def process_video(self, video_path, filename, task_id):
         video.release()
         output_video.release()
         cv2.destroyAllWindows()
+
+        # Borrar los archivos temporales
+        remove(temp_video_path)
+        remove(temp_output_path)
