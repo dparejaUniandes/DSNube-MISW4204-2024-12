@@ -1,0 +1,7 @@
+Requests,Concurrency,Requests per second,Time per request (ms),Transfer rate (kb/s)
+10,10,8.00 [#/sec] (mean),1249.850 [ms] (mean),1.91 [Kbytes/sec] received
+50,50,6.08 [#/sec] (mean),8228.318 [ms] (mean),1.45 [Kbytes/sec] received
+100,100,7.13 [#/sec] (mean),14026.270 [ms] (mean),1.70 [Kbytes/sec] received
+200,200,8.57 [#/sec] (mean),23330.080 [ms] (mean),2.04 [Kbytes/sec] received
+300,300,9.12 [#/sec] (mean),24906.973 [ms] (mean),2.17 [Kbytes/sec] received
+400,400,8.51 [#/sec] (mean),27029.645 [ms] (mean),2.03 [Kbytes/sec] received

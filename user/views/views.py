@@ -9,8 +9,10 @@ from werkzeug.utils import secure_filename
 from hashlib import sha256
 from models import *
 from celery import Celery
+from os import environ
+from google.cloud import storage
 
-celery_app = Celery('tasks', broker='redis://redis:6379')
+celery_app = Celery('tasks', broker="redis://34.71.71.115:6379")
 
 class LogInView(Resource):
     def post(self):
@@ -78,20 +80,30 @@ class TasksView(Resource):
         filename = secure_filename(video_file.filename)
         pre_processed_filename = f"pre_processed_{_uuid}_{filename}"
         video_path = os.path.join('videos', pre_processed_filename)
-        video_file.save(video_path)
+
+        bucket_name = 'bucket-fpv'
+
+        storage_client = storage.Client()
+        bucket = storage_client.bucket(bucket_name)
+        blob = bucket.blob(video_path)
+        blob.upload_from_file(video_file)
+        video_url = blob.public_url
 
         new_task = Task(
-            name= pre_processed_filename,
-            user_id= current_user_id,
-            video_path= video_path
+            name = pre_processed_filename,
+            user_id = current_user_id,
+            video_path = video_url
         )
 
         db.session.add(new_task)
         db.session.commit()
 
-        celery_app.send_task('process_video', args=[video_path, f"{_uuid}_{filename}", str(new_task.id)])
-
-        return {"message": 'Task created successfully'}, 201
+        try:
+            celery_app.send_task('process_video', args=[video_path, f"{_uuid}_{filename}", str(new_task.id)])
+            return {"message": 'Task created successfully'}, 201
+        except Exception as e:
+            print(f"Error al enviar la tarea a Celery: {str(e)}")
+            return {"message": 'Error creating task'}, 500
     
 class TaskView(Resource):
 
