@@ -10,7 +10,7 @@ celery_app = Celery('tasks', broker="redis://10.128.0.20:6379")
 
 @celery_app.task(bind=True, name='process_video')
 def process_video(self, video_path, filename, task_id):
-    print("******, ", video_path)
+    print("*****, ", video_path)
     logo_path = 'videos/logo.png'
 
     bucket_name = 'bucket-fpv'
@@ -19,7 +19,6 @@ def process_video(self, video_path, filename, task_id):
     bucket = storage_client.bucket(bucket_name)
     temp_video_path = '/tmp/' + filename
 
-    
     try:
         blob = bucket.blob("videos/pre_processed_" + filename)
         blob.download_to_filename(temp_video_path)
