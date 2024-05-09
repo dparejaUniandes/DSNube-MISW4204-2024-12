@@ -115,7 +115,7 @@ class TasksView(Resource):
                 'task_id': str(new_task.id)
             }
             data = json.dumps(record).encode("utf-8")
-            future = publisher.publish(topic_path, data)
+            future = publisher.publish(topic_path, data, **record)
             print(f'published message id {future.result()}')
             return {"message": 'Task created successfully'}, 201
         except Exception as e:
