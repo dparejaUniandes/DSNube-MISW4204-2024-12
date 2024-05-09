@@ -27,11 +27,13 @@ def callback(message: pubsub_v1.subscriber.message.Message) -> None:
         for key in message.attributes:
             if key == 'video_path':
                 video_path = message.attributes.get(key)
+                print(f"{key}: {video_path}")
             elif key == 'filename':
                 filename = message.attributes.get(key)
+                print(f"{key}: {filename}")
             elif key == 'task_id':
                 task_id = message.attributes.get(key)
-            print(f"{key}: {video_path} {key}: {filename} {key}: {task_id}")
+                print(f"{key}: {task_id}")
     message.ack()
     process_video(video_path, filename, task_id)
 
