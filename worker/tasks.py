@@ -99,13 +99,13 @@ def process_video(video_path, filename, task_id):
             print(f"Error al actualizar la tarea {task_id}: {str(e)}")
 
     finally:
-        video.release()
-        output_video.release()
-        cv2.destroyAllWindows()
-
         # Borrar los archivos temporales
         remove(temp_video_path)
         remove(temp_output.name)
+        
+        video.release()
+        output_video.release()
+        cv2.destroyAllWindows()
 
 streaming_pull_future = subscriber.subscribe(subscription_path, callback=callback)
 print(f"Listening for messages on {subscription_path}..\n")
