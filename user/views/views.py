@@ -17,8 +17,8 @@ from google.cloud import pubsub_v1
 # Publish message: https://cloud.google.com/pubsub/docs/samples/pubsub-quickstart-publisher?hl=es-419
 # https://stackoverflow.com/questions/51149091/publish-non-string-message-in-cloud-pubsub
 
-project_id = "your-project-id"
-topic_id = "your-topic-id"
+project_id = "curso-nube-202412"
+topic_id = "fpv-topic"
 
 publisher = pubsub_v1.PublisherClient()
 # The `topic_path` method creates a fully qualified identifier

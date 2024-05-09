@@ -11,8 +11,10 @@ from google.cloud import pubsub_v1
 # Get JSON messages: https://cloud.google.com/pubsub/docs/samples/pubsub-subscriber-async-pull-custom-attributes?hl=es-419#pubsub_subscriber_async_pull_custom_attributes-python
 
 
-project_id = "your-project-id"
-subscription_id = "your-subscription-id"
+project_id = "curso-nube-202412"
+subscription_id = "fpv-subscription"
+# Esta variable se puede poner en streaming_pull_future.result(timeout=timeout), pero quite la parte 
+# de los parentesis para que no se cierre el programa despues de 5 segundos
 timeout = 5.0
 
 subscriber = pubsub_v1.SubscriberClient()
@@ -111,7 +113,7 @@ with subscriber:
     try:
         # When `timeout` is not set, result() will block indefinitely,
         # unless an exception is encountered first.
-        streaming_pull_future.result(timeout=timeout)
+        streaming_pull_future.result()
     except TimeoutError:
         streaming_pull_future.cancel()  # Trigger the shutdown.
         streaming_pull_future.result()  # Block until the shutdown is complete.
