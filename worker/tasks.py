@@ -85,7 +85,7 @@ def process_video(video_path, filename, task_id):
             processed_blob = bucket.blob(processed_blob_name)
             processed_blob.upload_from_file(temp_output, rewind=True)
 
-        url = f"http://34.41.186.142:8080/api/tasks/{task_id}"
+        url = f"http://35.188.61.182:8080/api/tasks/{task_id}"
         data = {
             "name": f"processed_{filename}",
             "video_path": f"videos/processed_{filename}"
