@@ -50,7 +50,13 @@ def run_load_test(url, requests, concurrency, data_file=None, header=None, video
   if header:
     command += f' -H "{header}"'
   if video_file:
-    command += f' -T "video/mp4" -p "{video_file}"'
+    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+      temp_file.write(f'--1234567890\r\nContent-Disposition: form-data; name="video"; filename="{video_file}"\r\nContent-Type: video/mp4\r\n\r\n'.encode())
+      with open(video_file, "rb") as file:
+        temp_file.write(file.read())
+      temp_file.write(b"\r\n--1234567890--\r\n")
+      temp_file_path = temp_file.name
+    command += f' -T "multipart/form-data; boundary=1234567890" -p "{temp_file_path}"'
   command += f" {url}"
   process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   output, error = process.communicate()
