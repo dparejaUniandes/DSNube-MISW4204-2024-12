@@ -1,7 +1,7 @@
 Requests,Concurrency,Requests per second,Time per request (ms),Transfer rate (kb/s)
-10,10,7.99 [#/sec] (mean),1251.704 [ms] (mean),1.92 [Kbytes/sec] received
-50,50,9.19 [#/sec] (mean),5443.018 [ms] (mean),2.21 [Kbytes/sec] received
-100,100,9.27 [#/sec] (mean),10786.974 [ms] (mean),2.23 [Kbytes/sec] received
-200,200,9.50 [#/sec] (mean),21044.873 [ms] (mean),2.28 [Kbytes/sec] received
-300,300,9.13 [#/sec] (mean),32853.996 [ms] (mean),2.19 [Kbytes/sec] received
-400,400,6.05 [#/sec] (mean),66130.106 [ms] (mean),1.45 [Kbytes/sec] received
+10,10,7.79 [#/sec] (mean),1282.975 [ms] (mean),1.87 [Kbytes/sec] received
+50,50,6.41 [#/sec] (mean),7801.089 [ms] (mean),1.54 [Kbytes/sec] received
+100,100,9.29 [#/sec] (mean),10768.296 [ms] (mean),2.23 [Kbytes/sec] received
+200,200,8.40 [#/sec] (mean),23819.571 [ms] (mean),2.02 [Kbytes/sec] received
+300,300,4.74 [#/sec] (mean),63275.482 [ms] (mean),1.14 [Kbytes/sec] received
+400,400,7.83 [#/sec] (mean),51072.295 [ms] (mean),1.88 [Kbytes/sec] received

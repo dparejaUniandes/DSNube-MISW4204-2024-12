@@ -3,11 +3,12 @@ import json
 import csv
 import os
 import requests
+import tempfile
 
 # Configuración de las pruebas de carga
-signup_url = "http://35.188.61.182:8080/api/auth/signup"
-login_url = "http://35.188.61.182:8080/api/auth/login"
-tasks_url = "http://35.188.61.182:8080/api/tasks"
+signup_url = "http://34.67.60.130:8080/api/auth/signup"
+login_url = "http://34.67.60.130:8080/api/auth/login"
+tasks_url = "http://34.67.60.130:8080/api/tasks"
 # signup_url = "http://34.132.255.5:8080/api/auth/signup"
 # login_url = "http://34.132.255.5:8080/api/auth/login"
 # tasks_url = "http://34.132.255.5:8080/api/tasks"
@@ -22,7 +23,7 @@ scenarios = [
   {"requests": 100, "concurrency": 100},
   {"requests": 200, "concurrency": 200},
   {"requests": 300, "concurrency": 300},
-  {"requests": 400, "concurrency": 400}
+  {"requests": 400, "concurrency": 400},
 ]
 
 # Leer los datos JSON desde los archivos
@@ -125,7 +126,7 @@ for scenario in scenarios:
   # Prueba de estres - carga de video
   print(f"Ejecutando prueba de estres para la carga de video con {scenarioRequests} solicitudes y {concurrency} de concurrencia...")
   header = f'Authorization: Bearer {auth_token}'
-  output, error = run_load_test(tasks_url, scenarioRequests, concurrency, header=header)
+  output, error = run_load_test(tasks_url, scenarioRequests, concurrency, header=header, video_file=video_file)
   print("Resultado:")
   print(output)
   print("Error (si hay alguno):")
