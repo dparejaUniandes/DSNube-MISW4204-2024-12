@@ -3,11 +3,12 @@ import json
 import csv
 import os
 import requests
+import tempfile
 
 # Configuración de las pruebas de carga
-signup_url = "http://35.188.61.182:8080/api/auth/signup"
-login_url = "http://35.188.61.182:8080/api/auth/login"
-tasks_url = "http://35.188.61.182:8080/api/tasks"
+signup_url = "http://34.67.60.130:8080/api/auth/signup"
+login_url = "http://34.67.60.130:8080/api/auth/login"
+tasks_url = "http://34.67.60.130:8080/api/tasks"
 # signup_url = "http://34.132.255.5:8080/api/auth/signup"
 # login_url = "http://34.132.255.5:8080/api/auth/login"
 # tasks_url = "http://34.132.255.5:8080/api/tasks"
@@ -22,7 +23,7 @@ scenarios = [
   {"requests": 100, "concurrency": 100},
   {"requests": 200, "concurrency": 200},
   {"requests": 300, "concurrency": 300},
-  {"requests": 400, "concurrency": 400}
+  {"requests": 400, "concurrency": 400},
 ]
 
 # Leer los datos JSON desde los archivos
@@ -49,7 +50,13 @@ def run_load_test(url, requests, concurrency, data_file=None, header=None, video
   if header:
     command += f' -H "{header}"'
   if video_file:
-    command += f' -T "video/mp4" -p "{video_file}"'
+    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+      temp_file.write(f'--1234567890\r\nContent-Disposition: form-data; name="video"; filename="{video_file}"\r\nContent-Type: video/mp4\r\n\r\n'.encode())
+      with open(video_file, "rb") as file:
+        temp_file.write(file.read())
+      temp_file.write(b"\r\n--1234567890--\r\n")
+      temp_file_path = temp_file.name
+    command += f' -T "multipart/form-data; boundary=1234567890" -p "{temp_file_path}"'
   command += f" {url}"
   process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   output, error = process.communicate()
@@ -125,7 +132,7 @@ for scenario in scenarios:
   # Prueba de estres - carga de video
   print(f"Ejecutando prueba de estres para la carga de video con {scenarioRequests} solicitudes y {concurrency} de concurrencia...")
   header = f'Authorization: Bearer {auth_token}'
-  output, error = run_load_test(tasks_url, scenarioRequests, concurrency, header=header)
+  output, error = run_load_test(tasks_url, scenarioRequests, concurrency, header=header, video_file=video_file)
   print("Resultado:")
   print(output)
   print("Error (si hay alguno):")
