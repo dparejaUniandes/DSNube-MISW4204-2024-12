@@ -13,7 +13,5 @@ Werkzeug==2.2.2
 flask-jwt-extended
 flask_jwt_extended
 gunicorn
-celery==5.2.7
-redis==4.5.4
 google-cloud-storage==2.16.0
 google-cloud-pubsub
