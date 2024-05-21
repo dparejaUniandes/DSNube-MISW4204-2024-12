@@ -21,8 +21,8 @@ project_id = "curso-nube-202412"
 topic_id = "fpv-topic"
 
 # TOPIC
-# publisher = pubsub_v1.PublisherClient()
-# topic_path = publisher.topic_path(project_id, topic_id)
+publisher = pubsub_v1.PublisherClient()
+topic_path = publisher.topic_path(project_id, topic_id)
 
 class LogInView(Resource):
     def post(self):
@@ -93,11 +93,11 @@ class TasksView(Resource):
         bucket_name = 'bucket-fpv'
 
         # STORAGE
-        # storage_client = storage.Client()
-        # bucket = storage_client.bucket(bucket_name)
-        # blob = bucket.blob(video_path)
-        # blob.upload_from_file(video_file)
-        # video_url = blob.public_url
+        storage_client = storage.Client()
+        bucket = storage_client.bucket(bucket_name)
+        blob = bucket.blob(video_path)
+        blob.upload_from_file(video_file)
+        video_url = blob.public_url
         video_url = "blob.public_url"
 
         new_task = Task(
@@ -117,8 +117,8 @@ class TasksView(Resource):
             }
             data = json.dumps(record).encode("utf-8")
             # TOPIC
-            # future = publisher.publish(topic_path, data, **record)
-            # print(f'published message id {future.result()}')
+            future = publisher.publish(topic_path, data, **record)
+            print(f'published message id {future.result()}')
             return {"message": 'Task created successfully'}, 201
         except Exception as e:
             print(f"Error al enviar la tarea a Celery: {str(e)}")
