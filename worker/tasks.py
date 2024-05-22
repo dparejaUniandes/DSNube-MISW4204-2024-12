@@ -40,7 +40,7 @@ class ProcessVideoView(Resource):
                     task_id = request.json["message"]["attributes"][key]
                     print(f"{key}: {task_id}")
             return process_video(video_path, filename, task_id)
-        return {'message':'Successful file processed'}, 200
+        return {'message':'Nothing processed'}, 200
     
 # TOPIC
 # def callback(message: pubsub_v1.subscriber.message.Message) -> None:
