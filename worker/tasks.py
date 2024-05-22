@@ -27,6 +27,7 @@ timeout = 5.0
 
 class ProcessVideoView(Resource):
     def post(self):
+        print("*************", request.json)
         video_path=request.json["video_path"]
         filename=request.json["filename"]
         task_id=request.json["task_id"]
