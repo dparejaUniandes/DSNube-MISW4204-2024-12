@@ -28,16 +28,17 @@ timeout = 5.0
 class ProcessVideoView(Resource):
     def post(self):
         print("*************", request.json)
-        for key in request.json["message"]["attributes"]:
-            if key == 'video_path':
-                video_path = request.json["message"]["attributes"]["video_path"]
-                print(f"{key}: {video_path}")
-            elif key == 'filename':
-                filename = request.json["message"]["attributes"]["filename"]
-                print(f"{key}: {filename}")
-            elif key == 'task_id':
-                task_id = request.json["message"]["attributes"]["task_id"]
-                print(f"{key}: {task_id}")
+        if request.json["message"]["attributes"]:
+            for key in request.json["message"]["attributes"]:
+                if key == 'video_path':
+                    video_path = request.json["message"]["attributes"][key]
+                    print(f"{key}: {video_path}")
+                elif key == 'filename':
+                    filename = request.json["message"]["attributes"][key]
+                    print(f"{key}: {filename}")
+                elif key == 'task_id':
+                    task_id = request.json["message"]["attributes"][key]
+                    print(f"{key}: {task_id}")
 
         # REMOVE
         # task = Task.query.filter(Task.id == task_id).first()
