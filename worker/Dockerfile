@@ -9,13 +9,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-EXPOSE 8081
+EXPOSE 8080
 
 ENV FLASK_APP=app.py
 ENV FLASK_DEBUG=1
 ENV DEBUG=true
-ENV PORT=8081
 
 # CMD ["flask", "run", "--host=0.0.0.0"]
 # CMD ["celery", "-A", "tasks", "worker", "--loglevel=info"]
-CMD ["gunicorn", "--bind", "0.0.0.0:8081", "app:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "app:app"]
