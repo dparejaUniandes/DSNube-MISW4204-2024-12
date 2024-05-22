@@ -14,9 +14,9 @@ from flask_restful import Resource
 # References:
 # Get JSON messages: https://cloud.google.com/pubsub/docs/samples/pubsub-subscriber-async-pull-custom-attributes?hl=es-419#pubsub_subscriber_async_pull_custom_attributes-python
 
-
-project_id = "curso-nube-202412"
-subscription_id = "fpv-subscription"
+# TOPIC
+# project_id = "curso-nube-202412"
+# subscription_id = "fpv-subscription"
 # Esta variable se puede poner en streaming_pull_future.result(timeout=timeout), pero quite la parte 
 # de los parentesis para que no se cierre el programa despues de 5 segundos
 timeout = 5.0
@@ -32,17 +32,17 @@ class ProcessVideoView(Resource):
         task_id=request.json["task_id"]
 
         # REMOVE
-        task = Task.query.filter(Task.id == task_id).first()
+        # task = Task.query.filter(Task.id == task_id).first()
 
-        task.status = TaskStatus.PROCESSED
-        task.name = f"processed_{filename}"
-        task.video_path = f"videos/processed_{filename}"
+        # task.status = TaskStatus.PROCESSED
+        # task.name = f"processed_{filename}"
+        # task.video_path = f"videos/processed_{filename}"
 
-        db.session.commit() 
+        # db.session.commit() 
         # REMOVE UNTIL HERE
         
-        #return process_video(video_path, filename, task_id)
-        return {"video_path": video_path, "filename": filename, "task_id": task_id}, 200
+        #return {"video_path": video_path, "filename": filename, "task_id": task_id}, 200
+        return process_video(video_path, filename, task_id)
     
 # TOPIC
 # def callback(message: pubsub_v1.subscriber.message.Message) -> None:
