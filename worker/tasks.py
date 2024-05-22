@@ -28,7 +28,7 @@ timeout = 5.0
 class ProcessVideoView(Resource):
     def post(self):
         print("*************", request.json)
-        if request.json["message"]["attributes"]:
+        if "attributes" in request.json["message"]:
             for key in request.json["message"]["attributes"]:
                 if key == 'video_path':
                     video_path = request.json["message"]["attributes"][key]
@@ -39,19 +39,8 @@ class ProcessVideoView(Resource):
                 elif key == 'task_id':
                     task_id = request.json["message"]["attributes"][key]
                     print(f"{key}: {task_id}")
-
-        # REMOVE
-        # task = Task.query.filter(Task.id == task_id).first()
-
-        # task.status = TaskStatus.PROCESSED
-        # task.name = f"processed_{filename}"
-        # task.video_path = f"videos/processed_{filename}"
-
-        # db.session.commit() 
-        # REMOVE UNTIL HERE
-        
-        #return {"video_path": video_path, "filename": filename, "task_id": task_id}, 200
-        return process_video(video_path, filename, task_id)
+            return process_video(video_path, filename, task_id)
+        return {'message':'Successful file processed'}, 200
     
 # TOPIC
 # def callback(message: pubsub_v1.subscriber.message.Message) -> None:
@@ -82,7 +71,7 @@ def process_video(video_path, filename, task_id):
     temp_video_path = '/tmp/' + filename
 
     # For answer to topic
-    message, status = {'message':'Successful login'}, 200
+    message, status = {'message':'Successful file processed'}, 200
 
     try:
         blob = bucket.blob("videos/pre_processed_" + filename)
