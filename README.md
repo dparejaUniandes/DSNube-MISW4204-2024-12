@@ -84,7 +84,7 @@ The API includes the following endpoints:
  - **Download collection**
  - For download, see the wiki page: https://github.com/dparejaUniandes/DSNube-MISW4204-2024-12/wiki
 
-## API Endpoints SEMANA 4 - SEMANA 5
+## API Endpoints SEMANA 4 - SEMANA 5 y Semana 6
 
 The API includes the following endpoints:
 
