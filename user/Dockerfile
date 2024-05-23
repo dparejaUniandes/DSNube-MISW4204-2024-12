@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Expose the port on which the Flask application will run
-EXPOSE 5000
+EXPOSE 8080
 
 # Set the environment variable for Flask
 ENV FLASK_APP=app.py
@@ -23,4 +23,4 @@ ENV DEBUG=true
 
 # Run the Flask application
 # CMD ["flask", "run", "--host=0.0.0.0", "--debugger"]
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--limit-request-line", "26214400", "--limit-request-field_size", "26214400", "--keep-alive", "5", "app:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--limit-request-line", "26214400", "--limit-request-field_size", "26214400", "--keep-alive", "5", "app:app"]
