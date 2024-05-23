@@ -20,9 +20,8 @@ from google.cloud import pubsub_v1
 project_id = "curso-nube-202412"
 topic_id = "fpv-topic"
 
+# TOPIC
 publisher = pubsub_v1.PublisherClient()
-# The `topic_path` method creates a fully qualified identifier
-# in the form `projects/{project_id}/topics/{topic_id}`
 topic_path = publisher.topic_path(project_id, topic_id)
 
 class LogInView(Resource):
@@ -93,11 +92,13 @@ class TasksView(Resource):
 
         bucket_name = 'bucket-fpv'
 
+        # STORAGE
         storage_client = storage.Client()
         bucket = storage_client.bucket(bucket_name)
         blob = bucket.blob(video_path)
         blob.upload_from_file(video_file)
         video_url = blob.public_url
+        video_url = "blob.public_url"
 
         new_task = Task(
             name = pre_processed_filename,
@@ -115,6 +116,7 @@ class TasksView(Resource):
                 'task_id': str(new_task.id)
             }
             data = json.dumps(record).encode("utf-8")
+            # TOPIC
             future = publisher.publish(topic_path, data, **record)
             print(f'published message id {future.result()}')
             return {"message": 'Task created successfully'}, 201
