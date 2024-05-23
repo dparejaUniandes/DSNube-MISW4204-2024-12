@@ -124,3 +124,5 @@ The API includes the following endpoints:
 Los endpoints mencionados en la entrega anterior se mantienen para la **capa web**, la diferencia radica en que ya no se accede por medio de una dirección IP sino a través de un dominio que el propio servicio de Cloud Run genera al desplegar una aplicación.
 
 La **capa de procesamiento** al no recibir los mensajes por medio de un broker como Redis y colas con Celery o no implementar el mecanismo de suscripción pull, se expone un nuevo endpoint para procesar archivos, este endpoint se invoca desde la suscripción del tópico a través del mecanismo push.
+
+<img width="612" alt="image" src="https://github.com/dparejaUniandes/DSNube-MISW4204-2024-12/assets/142551793/fe2cbfd3-94a6-45b9-93a0-13172586f3d4">
