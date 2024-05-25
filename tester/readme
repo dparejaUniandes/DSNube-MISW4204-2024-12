@@ -6,7 +6,7 @@
 - Apache Benchmark (ab)
 - Gnuplot
 
-## Pasos
+## Pasos Apache Benchmark (ab)
 
 1. **Configurar los archivos de datos**
    - Asegúrate de tener los archivos JSON necesarios para las pruebas de carga:
@@ -25,6 +25,10 @@
      python tester.py
      ```
    - El script realizará las pruebas de carga en los endpoints configurados y generará un archivo CSV con los resultados llamado `load_test_results.csv`.
+
+## Pasos JMeter
+
+### Pasos para creación de imagen comparativa
 
 4. **Instalar Gnuplot**
    - Si aún no tienes Gnuplot instalado, descarga el instalador desde el sitio web oficial de Gnuplot: http://www.gnuplot.info/

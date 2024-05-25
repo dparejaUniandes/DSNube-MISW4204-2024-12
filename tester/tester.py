@@ -6,9 +6,9 @@ import requests
 import tempfile
 
 # Configuración de las pruebas de carga
-signup_url = "http://34.67.60.130:8080/api/auth/signup"
-login_url = "http://34.67.60.130:8080/api/auth/login"
-tasks_url = "http://34.67.60.130:8080/api/tasks"
+signup_url = "https://web-server-qm5if74vma-uc.a.run.app/api/auth/signup"
+login_url = "https://web-server-qm5if74vma-uc.a.run.app/api/auth/login"
+tasks_url = "https://web-server-qm5if74vma-uc.a.run.app/api/tasks"
 # signup_url = "http://34.132.255.5:8080/api/auth/signup"
 # login_url = "http://34.132.255.5:8080/api/auth/login"
 # tasks_url = "http://34.132.255.5:8080/api/tasks"
@@ -44,7 +44,7 @@ def get_auth_token():
 
 # Función para ejecutar las pruebas de carga con Apache Benchmark
 def run_load_test(url, requests, concurrency, data_file=None, header=None, video_file=None):
-  command = f"ab -n {requests} -c {concurrency}"
+  command = f"ab -k -n {requests} -c {concurrency}"
   if data_file:
     command += f" -p {data_file}"
   if header:
@@ -58,6 +58,7 @@ def run_load_test(url, requests, concurrency, data_file=None, header=None, video
       temp_file_path = temp_file.name
     command += f' -T "multipart/form-data; boundary=1234567890" -p "{temp_file_path}"'
   command += f" {url}"
+  print(command)
   process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   output, error = process.communicate()
 
