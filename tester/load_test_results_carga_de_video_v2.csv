@@ -1,25 +1,7 @@
 Requests,Concurrency,Requests per second,Time per request (ms),Transfer rate (kb/s)
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-10,10,7.81 [#/sec] (mean),1280.936 [ms] (mean),3.57 [Kbytes/sec] received
-50,50,5.77 [#/sec] (mean),8661.270 [ms] (mean),2.64 [Kbytes/sec] received
-100,100,9.33 [#/sec] (mean),10722.729 [ms] (mean),4.26 [Kbytes/sec] received
-200,200,8.62 [#/sec] (mean),23208.385 [ms] (mean),3.94 [Kbytes/sec] received
-300,300,9.43 [#/sec] (mean),31816.030 [ms] (mean),4.31 [Kbytes/sec] received
-400,400,9.22 [#/sec] (mean),43379.284 [ms] (mean),4.21 [Kbytes/sec] received
-=======
 10,10,8.12 [#/sec] (mean),15231.527 [ms] (mean),1.56 [Kbytes/sec]
 50,50,39.47 [#/sec] (mean),15266.792 [ms] (mean),7.59 [Kbytes/sec]
 100,100,78.63 [#/sec] (mean),30271.849 [ms] (mean),15.12 [Kbytes/sec]
 200,200,153.29 [#/sec] (mean),38304.975 [ms] (mean),29.48 [Kbytes/sec]
 300,300,227.51 [#/sec] (mean),50318.546 [ms] (mean),43.75 [Kbytes/sec]
 400,400,298.92 [#/sec] (mean),60337.793 [ms] (mean),57.49 [Kbytes/sec]
->>>>>>> Stashed changes
-=======
-10,10,0.40 [#/sec] (mean),25291.653 [ms] (mean),0.07 [Kbytes/sec] received
-50,50,0.35 [#/sec] (mean),142995.888 [ms] (mean),0.07 [Kbytes/sec] received
-100,100,0.36 [#/sec] (mean),275390.247 [ms] (mean),0.07 [Kbytes/sec] received
-200,200,,,
-300,300,,,
-400,400,,,
->>>>>>> 06e6cc6a51384fbbf779b375856aabb8ecabc7f6
