@@ -1,15 +1,66 @@
 from tempfile import NamedTemporaryFile
-from celery import Celery
 import cv2
 import requests
 from requests.exceptions import RequestException
 from os import environ, remove
+from models import *
+from flask import request
+
 from google.cloud import storage
+from concurrent.futures import TimeoutError
+from google.cloud import pubsub_v1
+from flask_restful import Resource
 
-celery_app = Celery('tasks', broker="redis://10.128.0.20:6379")
+# References:
+# Get JSON messages: https://cloud.google.com/pubsub/docs/samples/pubsub-subscriber-async-pull-custom-attributes?hl=es-419#pubsub_subscriber_async_pull_custom_attributes-python
 
-@celery_app.task(bind=True, name='process_video')
-def process_video(self, video_path, filename, task_id):
+# TOPIC
+# project_id = "curso-nube-202412"
+# subscription_id = "fpv-subscription"
+# Esta variable se puede poner en streaming_pull_future.result(timeout=timeout), pero quite la parte 
+# de los parentesis para que no se cierre el programa despues de 5 segundos
+timeout = 5.0
+
+# TOPIC
+# subscriber = pubsub_v1.SubscriberClient()
+# subscription_path = subscriber.subscription_path(project_id, subscription_id)
+
+class ProcessVideoView(Resource):
+    def post(self):
+        print("*************", request.json)
+        if "attributes" in request.json["message"]:
+            for key in request.json["message"]["attributes"]:
+                if key == 'video_path':
+                    video_path = request.json["message"]["attributes"][key]
+                    print(f"{key}: {video_path}")
+                elif key == 'filename':
+                    filename = request.json["message"]["attributes"][key]
+                    print(f"{key}: {filename}")
+                elif key == 'task_id':
+                    task_id = request.json["message"]["attributes"][key]
+                    print(f"{key}: {task_id}")
+            return process_video(video_path, filename, task_id)
+        return {'message':'Nothing processed'}, 200
+    
+# TOPIC
+# def callback(message: pubsub_v1.subscriber.message.Message) -> None:
+#     print(f"Received {message.data!r}.")
+#     if message.attributes:
+#         print("Attributes:")
+#         for key in message.attributes:
+#             if key == 'video_path':
+#                 video_path = message.attributes.get(key)
+#                 print(f"{key}: {video_path}")
+#             elif key == 'filename':
+#                 filename = message.attributes.get(key)
+#                 print(f"{key}: {filename}")
+#             elif key == 'task_id':
+#                 task_id = message.attributes.get(key)
+#                 print(f"{key}: {task_id}")
+#     message.ack()
+#     process_video(video_path, filename, task_id)
+
+def process_video(video_path, filename, task_id):
     print("*****, ", video_path)
     logo_path = 'videos/logo.png'
 
@@ -18,6 +69,9 @@ def process_video(self, video_path, filename, task_id):
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
     temp_video_path = '/tmp/' + filename
+
+    # For answer to topic
+    message, status = {'message':'Successful file processed'}, 200
 
     try:
         blob = bucket.blob("videos/pre_processed_" + filename)
@@ -57,25 +111,48 @@ def process_video(self, video_path, filename, task_id):
             processed_blob = bucket.blob(processed_blob_name)
             processed_blob.upload_from_file(temp_output, rewind=True)
 
-        url = f"http://34.41.186.142:8080/api/tasks/{task_id}"
-        data = {
-            "name": f"processed_{filename}",
-            "video_path": f"videos/processed_{filename}"
-        }
+        # url = f"http://35.239.86.185:8080/api/tasks/{task_id}"
+        # data = {
+        #     "name": f"processed_{filename}",
+        #     "video_path": f"videos/processed_{filename}"
+        # }
+
+        # try:
+        #     response = requests.put(url, json=data)
+        #     response.raise_for_status()
+        #     print(f"Tarea {task_id} actualizada exitosamente")
+        # except RequestException as e:
+        #     print(f"Error al actualizar la tarea {task_id}: {str(e)}")
+
+        task = Task.query.filter(Task.id == task_id).first()
+
+        task.status = TaskStatus.PROCESSED
+        task.name = f"processed_{filename}"
+        task.video_path = f"videos/processed_{filename}"
+
+        db.session.commit() 
         
-        try:
-            response = requests.put(url, json=data)
-            response.raise_for_status()
-            print(f"Tarea {task_id} actualizada exitosamente")
-        except RequestException as e:
-            print(f"Error al actualizar la tarea {task_id}: {str(e)}")
-            raise self.retry(exc=e, countdown=60)
 
     finally:
-        video.release()
-        output_video.release()
-        cv2.destroyAllWindows()
-
         # Borrar los archivos temporales
         remove(temp_video_path)
         remove(temp_output.name)
+        
+        video.release()
+        output_video.release()
+        cv2.destroyAllWindows()
+        return message, status
+
+# TOPIC
+# streaming_pull_future = subscriber.subscribe(subscription_path, callback=callback)
+# print(f"Listening for messages on {subscription_path}..\n")
+
+# # Wrap subscriber in a 'with' block to automatically call close() when done.
+# with subscriber:
+#     try:
+#         # When `timeout` is not set, result() will block indefinitely,
+#         # unless an exception is encountered first.
+#         streaming_pull_future.result()
+#     except TimeoutError:
+#         streaming_pull_future.cancel()  # Trigger the shutdown.
+#         streaming_pull_future.result()  # Block until the shutdown is complete.

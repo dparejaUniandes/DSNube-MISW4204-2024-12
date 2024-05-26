@@ -1,3 +1,4 @@
+import json
 import re
 import os
 import uuid
@@ -8,11 +9,20 @@ from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_requir
 from werkzeug.utils import secure_filename
 from hashlib import sha256
 from models import *
-from celery import Celery
 from os import environ
 from google.cloud import storage
+from google.cloud import pubsub_v1
 
-celery_app = Celery('tasks', broker="redis://34.71.71.115:6379")
+# References:
+# Publish message: https://cloud.google.com/pubsub/docs/samples/pubsub-quickstart-publisher?hl=es-419
+# https://stackoverflow.com/questions/51149091/publish-non-string-message-in-cloud-pubsub
+
+project_id = "curso-nube-202412"
+topic_id = "fpv-topic"
+
+# TOPIC
+publisher = pubsub_v1.PublisherClient()
+topic_path = publisher.topic_path(project_id, topic_id)
 
 class LogInView(Resource):
     def post(self):
@@ -65,7 +75,6 @@ class TasksView(Resource):
         return [task_schema.dump(task) for task in tasks]
     
     @jwt_required()
-    @celery_app.task(name="app.workers.process-video")
     def post(self):
         current_user_id = get_jwt_identity()
         _uuid = str(uuid.uuid4())
@@ -83,11 +92,13 @@ class TasksView(Resource):
 
         bucket_name = 'bucket-fpv'
 
+        # STORAGE
         storage_client = storage.Client()
         bucket = storage_client.bucket(bucket_name)
         blob = bucket.blob(video_path)
         blob.upload_from_file(video_file)
         video_url = blob.public_url
+        video_url = "blob.public_url"
 
         new_task = Task(
             name = pre_processed_filename,
@@ -99,7 +110,15 @@ class TasksView(Resource):
         db.session.commit()
 
         try:
-            celery_app.send_task('process_video', args=[video_path, f"{_uuid}_{filename}", str(new_task.id)])
+            record = {
+                'video_path': video_path,
+                'filename': f"{_uuid}_{filename}",
+                'task_id': str(new_task.id)
+            }
+            data = json.dumps(record).encode("utf-8")
+            # TOPIC
+            future = publisher.publish(topic_path, data, **record)
+            print(f'published message id {future.result()}')
             return {"message": 'Task created successfully'}, 201
         except Exception as e:
             print(f"Error al enviar la tarea a Celery: {str(e)}")

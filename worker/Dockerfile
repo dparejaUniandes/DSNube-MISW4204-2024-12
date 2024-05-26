@@ -9,7 +9,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-ENV CELERY_BROKER_URL=redis://redis_broker:6379
+EXPOSE 8080
+
+ENV FLASK_APP=app.py
+ENV FLASK_DEBUG=1
+ENV DEBUG=true
 
 # CMD ["flask", "run", "--host=0.0.0.0"]
-CMD ["celery", "-A", "tasks", "worker", "--loglevel=info"]
+# CMD ["celery", "-A", "tasks", "worker", "--loglevel=info"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "app:app"]
